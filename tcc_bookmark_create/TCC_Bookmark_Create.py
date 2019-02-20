@@ -35,12 +35,13 @@ def file_selection(directory_path):
     root = tk.Tk()
     scrollbar = tk.Scrollbar(root, orient='vertical')
 
-    listbox = Listbox(root, width=50, height=50, yscrollcommand=scrollbar.set, selectmode=tk.MULTIPLE)
+    listbox = Listbox(root, width=50, height=50, yscrollcommand=scrollbar.set, selectmode=tk.EXTENDED)
     scrollbar.config(command=listbox.yview)
     scrollbar.pack(side='right', fill='y')
     listbox.pack(side='left', fill='both', expand=True)
     b = tk.Button(root, text='Delete',
-                  command=lambda lb=listbox: lb.delete(tk.ANCHOR))
+                  command=lambda listbox=listbox: listbox.delete(tk.ANCHOR))
+    b.pack(side='bottom', fill='x')
     listbox.pack()
     for f in files:
         listbox.insert(tk.END, f)
