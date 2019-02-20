@@ -40,7 +40,7 @@ def file_selection(directory_path):
     scrollbar.pack(side='right', fill='y')
     listbox.pack(side='left', fill='both', expand=True)
     b = tk.Button(root, text='Delete',
-                  command=lambda listbox=listbox: listbox.delete(tk.ANCHOR))
+                  command=lambda lb=listbox: lb.delete(tk.ANCHOR))
     b.pack(side='bottom', fill='x')
     listbox.pack()
     for f in files:
