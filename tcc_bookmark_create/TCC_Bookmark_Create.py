@@ -91,58 +91,104 @@ def file_selection(directory_path):
     return listbox.get(tk.ANCHOR)
 
 
+# This reads in a directory path and returns a dictionary of the pdf number keying the filename
 def directory_to_files_to_dict(directory_path):
+    # Pulls the float number from the front of the pdf title. Includes a possible letter or two
     num_match = r"([\d]+.[\w\d]*)"
     temp = {}
+
+    # Iterate over the list of files in the directory
     for f in os.listdir(directory_path):
+        # Check to make sure it's a file, and check that the title doesn't include the '_INITIAL ' name
         if os.path.isfile(os.path.join(directory_path, f)) and initial_flag not in f:
+            # Pull the number out and store it
             pdf_num = re.match(num_match, f).group(0)
+            # Store the converted float of the number as the key to the filename
             temp[string_converter(pdf_num)] = f
 
     return_dict = {}
+
+    # Because os.listdir doesn't like in order, we need to sort it after
     for key in sorted(list(temp)):
         return_dict[key] = temp[key]
     return return_dict
 
 
+# Converts a string of numbers and letters to an equivalent float number for sorting
 def string_converter(word):
     list_of_char = []
+
+    # Check each character individually to see if it's a . or a letter
     for char in word:
+        # Force uppercase
         char.upper()
+
+        # We want to add the period to the number string to act as the anchor for the float
         if char == ".":
             list_of_char.append(".")
+
+        # Otherwise we convert the letters to their respective numbers (A=1, B=2, ...)
         else:
             list_of_char.append(str_dict[char])
+
+    # Combine the characters and convert it to a float
     num = float("".join(list_of_char))
     return num
 
 
+# Opens the PdfFileReader objects of the filenames and store them in a dict with the bookmark name as the key
 def open_all_pdfs(directory, file_dict):
+    # This is one hell of a grep line, but it works.
+    # One issue, is that due to the table numbers, sometimes you end up with a trailing '.' on the name.
+    # This will be fixed later
     bookmark_grep = r"([a-zA-Z\d.]*[ -]*[a-zA-Z& ]+[\d]*[.]?[\d]*)"
     list_of_pdf_obj = {}
+
+    # Iterate through the dictionary of files, opening them as PdfFileReader objects
     for num, filename in file_dict.items():
         full_path = os.path.join(directory, filename)
         bookmark_name = re.search(bookmark_grep, filename).group(1)
+
+        # If the last letter of the name is '.' then we remove it
         if bookmark_name[-1] == ".":
             bookmark_name = bookmark_name[0:-1]
+
+        # Open the pdf and store it in the dict
         list_of_pdf_obj[bookmark_name] = PdfFileReader(open(full_path, 'rb'), False)
     return list_of_pdf_obj
 
 
+# This actually builds the final pdf with bookmarks
 def combine_and_bookmark(file_dict, pdfs):
+    # Create the writer object
     out = PdfFileWriter()
+
+    # This is used to track what bookmarks have been added, in order to add parent bookmarks as needed
     added_bookmarks = {}
+
+    # Gives the numbers to store as keys in added_bookmarks
     file_nums = list(file_dict.keys())
     counter = 0
-    for name in pdfs:
-        pdf = pdfs[name]
+
+    # Do this for every PDF we've opened
+    for name, pdf in pdfs.items():
+        # Determine the number of the pdf chapter
         pdf_num = int(file_nums[counter])
+
+        # Add the first page
         out.addPage(pdf.getPage(0))
+
+        # If we already added a pdf bookmark from this chapter:
         if pdf_num in added_bookmarks:
+            # We add the bookmark with the parent of the root of the chapter
             out.addBookmark(name, out.getNumPages() - 1, added_bookmarks[pdf_num])
+
+        # Otherwise if we haven't added a bookmark from this chapter yet
         else:
+            # Add the bookmark, and make sure to add that bookmark to the dict above
             b = out.addBookmark(name, out.getNumPages() - 1)
             added_bookmarks[pdf_num] = b
+        # Then, we iterate through the rest of the pages and add the rest
         for page_num in range(1, pdf.getNumPages()):
             out.addPage(pdf.getPage(page_num))
         counter += 1
