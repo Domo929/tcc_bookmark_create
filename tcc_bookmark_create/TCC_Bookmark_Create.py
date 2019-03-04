@@ -128,7 +128,7 @@ def open_all_pdfs(directory, file_dict):
         full_path = os.path.join(directory, filename)
         bookmark_name = re.search(bookmark_grep, filename).group(1)
 
-        # If the last letter of the name is '.' then we remove it
+        # If the last letter of the name is '.' then we remove it. Side effect of the bookmark_grep
         if bookmark_name[-1] == ".":
             bookmark_name = bookmark_name[0:-1]
 
