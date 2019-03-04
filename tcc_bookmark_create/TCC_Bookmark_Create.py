@@ -47,6 +47,7 @@ str_dict = {
 }
 
 
+# Just a wrapper for the argparse instance that handles the arguments. Just tucked away in a function
 def argument_handler():
     parser = argparse.ArgumentParser(description='Creates a combined, book-marked report')
     parser.add_argument('-d', '--directory',
@@ -56,6 +57,7 @@ def argument_handler():
     return vars(parser.parse_args())
 
 
+# If no directory is given, it prompts the user to select it
 def choose_directory(opts):
     directory_path = ''
     if opts['directory']:
@@ -106,7 +108,7 @@ def string_converter(word):
         if char == ".":
             list_of_char.append(".")
 
-        # Otherwise we convert the letters to their respective numbers (A=1, B=2, ...)
+        # Otherwise we convert the letters to their respective numbers (A=1, B=2, ..., Z=26)
         else:
             list_of_char.append(str_dict[char])
 
