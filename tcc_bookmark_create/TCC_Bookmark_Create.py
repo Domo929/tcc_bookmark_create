@@ -69,28 +69,6 @@ def choose_directory(opts):
     return directory_path
 
 
-def file_selection(directory_path):
-    files = [f for f in os.listdir(directory_path)
-             if os.path.isfile(os.path.join(directory_path, f)) and initial_flag not in f]
-
-    root = tk.Tk()
-    scrollbar = tk.Scrollbar(root, orient='vertical')
-
-    listbox = Listbox(root, width=50, height=50, yscrollcommand=scrollbar.set, selectmode=tk.SINGLE)
-    scrollbar.config(command=listbox.yview)
-    scrollbar.pack(side='right', fill='y')
-    listbox.pack(side='left', fill='both', expand=True)
-    tk.Button(root, text='Delete', command=lambda lb=listbox: lb.delete(tk.ANCHOR)).pack(side='bottom', fill='both')
-    tk.Button(root, text="Quit", command=root.destroy).pack(side='bottom', fill='both')
-    listbox.pack()
-    for f in files:
-        listbox.insert(tk.END, f)
-
-    root.mainloop()
-
-    return listbox.get(tk.ANCHOR)
-
-
 # This reads in a directory path and returns a dictionary of the pdf number keying the filename
 def directory_to_files_to_dict(directory_path):
     # Pulls the float number from the front of the pdf title. Includes a possible letter or two
