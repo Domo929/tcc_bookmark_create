@@ -101,10 +101,11 @@ def directory_to_files_to_dict(directory_path):
     for f in os.listdir(directory_path):
         # Check to make sure it's a file, and check that the title doesn't include the '_INITIAL ' name
         if os.path.isfile(os.path.join(directory_path, f)) and initial_flag not in f:
-            # Pull the number out and store it
-            pdf_num = re.match(num_match, f).group(0)
-            # Store the converted float of the number as the key to the filename
-            temp[string_converter(pdf_num)] = f
+            if re.match(num_match, f):
+                # Pull the number out and store it
+                pdf_num = re.match(num_match, f).group(0)
+                # Store the converted float of the number as the key to the filename
+                temp[string_converter(pdf_num)] = f
 
     return_dict = {}
 
@@ -136,7 +137,7 @@ def string_converter(word):
     return num
 
 
-# Opens the PdfFileReader objects of the filenames and store them in a dict with the bookmark name as the key
+# Opens the PdfFileReader objects of the filename and store them in a dict with the bookmark name as the key
 def open_all_pdfs(directory, file_dict):
     # This is one hell of a grep line, but it works.
     # One issue, is that due to the table numbers, sometimes you end up with a trailing '.' on the name.
@@ -186,8 +187,7 @@ def combine_and_bookmark(file_dict, pdfs):
         # Otherwise if we haven't added a bookmark from this chapter yet
         else:
             # Add the bookmark, and make sure to add that bookmark to the dict above
-            b = out.addBookmark(name, out.getNumPages() - 1)
-            added_bookmarks[pdf_num] = b
+            added_bookmarks[pdf_num] = out.addBookmark(name, out.getNumPages() - 1)
         # Then, we iterate through the rest of the pages and add the rest
         for page_num in range(1, pdf.getNumPages()):
             out.addPage(pdf.getPage(page_num))
